@@ -1,0 +1,47 @@
+#!/bin/bash
+
+print_help()
+{
+    echo "Script to Get devices when given an environment target and a valid hub ID"
+    echo ""
+    echo "Usage:  -t (target_environment) -h (hubid)"
+    echo ""
+}
+
+
+while  getopts "t:h:?" option;
+do
+       # echo $OPTARG
+        case $option in
+        t) target_environment=$OPTARG;;
+        h) hubid=$OPTARG;;
+        \?) print_help; exit 1
+	;;
+        esac
+done
+
+
+if [ -z "$target_environment" ]; then 
+	echo " target env missing"
+	print_help
+
+elif [ -z "$hubid" ]; then
+
+	echo "Hub ID is missing"
+	print_help
+else
+	echo "All options present. Will now continue..."
+
+sleep 2
+
+call=("-target=$target_environment -call=/hubs/$hubid")
+WD $call | jq  '. | {deviceName: [.deviceStatuses[].name]}, {deviceID: [.deviceStatuses[].id]}, {deviceType: [.deviceStatuses[].type]}, 
+                {deviceVersion: [.deviceStatuses[].version]}, {deviceLatestVersion: [.deviceStatuses[].latestVersion]},
+                 {deviceUpgradeStatus: [.deviceStatuses[].upgradeStatus]}'
+
+fi
+
+
+
+
+

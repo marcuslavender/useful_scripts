@@ -1,0 +1,28 @@
+#!/bin/bash
+
+print_help()
+{
+    echo "Script to list the various groups on an environment"
+    echo ""
+    echo "Usage:  -t (target_environment)"
+    echo ""
+}
+
+
+while  getopts "t:?" option;
+do
+        case $option in
+        t) target_environment=$OPTARG;;
+        \?) print_help; exit 1
+        ;;
+        esac
+done
+
+
+if [ -z "$target_environment" ]; then
+	echo "Target environment option not given"
+	print_help
+else
+	call=("-target=$target_environment -call=/userGroups")
+	WD $call | jq '.[]'
+fi

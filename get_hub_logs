@@ -1,0 +1,67 @@
+#!/bin/bash
+
+#Script to return the logs from a hub of selected user
+
+ print_help() {
+	echo "Script to get logs from a hub when given an environment target and a valid hub ID"
+	echo ""
+	echo "Usage: -t (target_environment) -h (hubid)"
+	echo ""
+}
+
+while getopts "t:h:?" option;
+do
+
+	case $option in 
+	t) target_environment=$OPTARG;;
+	h) hubId=$OPTARG;;
+	\?) print_help; exit 1
+        ;;
+        esac
+done
+
+
+echo "Enter the log name that you wish to retrieve:"
+echo ""
+echo "boot.log"
+echo "cron"
+echo "cron.1"
+echo "cron.2"
+echo "cron.3"
+echo "datastore.log"
+echo "managerd.log"
+echo "managered.log.1"
+echo "managered.log.2"
+echo" managered.log.3"
+
+echo ""
+	while [ -z "$logName" ]
+	do
+		printf "[Enter log file name] :"
+		read -r logName
+		sleep 2
+	done
+echo ""
+
+
+echo "Enter the locations you wish to save the logs to:"
+echo ""
+
+                        while [ -z "$path" ]
+                        do
+
+                                printf "[Enter path to continue e.g /tmp/] :"
+                                read -r path
+                                sleep 2
+			done
+
+echo "Now getting the logs from hub"
+echo ""
+sleep 2
+
+call=$(echo "-target=$target_environment -method=GET -call=/management/diagnostics/hubs/$hubId/logs/files/$logName")
+WD $call > $path 
+
+echo "done"
+
+

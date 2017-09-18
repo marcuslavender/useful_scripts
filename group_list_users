@@ -1,0 +1,144 @@
+#!/bin/bash
+
+print_help()
+{
+    echo "Script to list the various users wthin a group on an environment"
+    echo ""
+    echo "Usage:  -t (target_environment) -g(group_id)"
+    echo ""
+}
+
+
+while  getopts "t:g:?" option;
+do
+        echo $OPTARG
+        case $option in
+	g) group_id=$OPTARG;;
+        t) target_environment=$OPTARG;;
+        \?) print_help; exit 1
+        ;;
+        esac
+done
+
+
+# Delete tmp files
+rm -f /tmp/usernames_list
+rm -f /tmp/user_information
+
+
+if [ -z "$target_environment" ] || [ -z "$group_id" ]; then
+        echo " option not given"
+        print_help
+	exit
+else
+
+
+
+function usernames {
+
+
+
+    echo "Would you like to display output to screen or write to file?"
+
+    while [ -z "$answer2" ]
+    do
+
+    printf "Enter [Display' or 'File' to continue] :"
+    read -r answer2
+    sleep 2
+
+
+#get total pages
+	call3=$(echo "-target="$target_environment "-call=/userGroups/$group_id/users")
+	totalpages=$(WD $call | jq '.page.totalPages')
+                                
+
+	if [ "$answer2" = "display" ] || [ "$answer2" = "Display" ] || [ "$answer2" = "DISPLAY" ]; then
+
+		for ((i=0; i <= totalpages; i++)) 
+		do  	
+			call4=$(echo "-target="$target_environment  "-call=/userGroups/$group_id/users?page.size=100&page.page=$i")  
+        		WD $call4 | jq '.content[] .username' | cut -d '"' -f2
+		done
+
+	elif [ "$answer2" = "file" ] || [ "$answer2" = "FILE" ] || [ "$answer2" = "File" ]; then
+		for ((i=0; i <= totalpages; i++))
+		do                   
+			call4=$(echo "-target="$target_environment  "-call=/userGroups/$group_id/users?page.size=100&page.page=$i")
+                        WD $call4 | jq '.content[] .username' | cut -d '"' -f2 >> /tmp/usernames_list
+			echo "Saved to /tmp/usernames_list"
+		done    
+	else
+        	echo "Invalid option please try again" 
+
+        fi
+                done
+
+	exit
+}
+
+
+#get total pages
+call=$(echo "-target="$target_environment "-call=/userGroups/$group_id/users")
+totalpages=$(WD $call | jq '.page.totalPages')echo $token_search
+
+while [ -z "$answer" ] 
+do
+        printf "Would you like to just get a list of usernames?  Enter ['Yes' or 'No'] : "
+        echo ""
+	read -r answer
+        sleep 2 
+
+
+        if [ "$answer" = "y" ] || [ "$answer" = "Y" ] || [ "$answer" = "YES" ] || [ "$answer" = "yes" ]; then
+                usernames
+        
+	elif [ "$answer" = 'n' ] || [ "$answer" = "N" ] || [ "$answer" = "NO" ] || [ "$answer" = "no" ]; then  
+		echo "Ok, will continue"
+		sleep 2
+		echo ""
+		echo "Would you like to display all user information to screen or write to file? Enter ['Display' or 'File' to continue]"
+		echo ""
+
+
+		while [ -z "$answer1" ]
+		do
+
+			printf "Enter [Display' or 'File' to continue] :"
+			read -r answer1
+			sleep 2
+
+
+			call2=$(echo "-target="$target_environment "-call=/userGroups/$group_id/users")
+        		totalpages=$(WD $call | jq '.page.totalPages')
+		
+			if [ "$answer1" = "display" ] || [ "$answer1" = "DISPLAY" ] || [ "$answer1" = "Display" ]; then
+			
+				for ((i=0; i <= totalpages; i++))
+                		do			
+					call2=$( echo "-target="$target_environment "-call=/userGroups/$group_id/users?page.size=100&page.page=$i")
+					WD $call2 | jq '.content[]' 
+				done	
+			
+	
+			elif [ "$answer1" = "file" ] || [ "$answer1" = "FILE" ] || [ "$answer1" = "File" ]; then
+		
+				for ((i=0; i <= totalpages; i++))
+                        	do
+					call2=$( echo "-target="$target_environment  "-call=/userGroups/$group_id/users?page.size=100&page.page=$i")
+        				WD $call2 | jq '.content[]' >> /tmp/user_information
+					sleep 1
+					echo "Saved to /tmp/user_information"
+				done
+			else
+
+				echo "echo Invalid option please try again" 
+			fi
+			done
+	else 	
+		echo "Invalid answer, please try again"
+		sleep 2	
+
+	fi
+done
+fi
