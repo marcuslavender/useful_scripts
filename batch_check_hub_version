@@ -1,0 +1,45 @@
+#!/bin/bash
+
+
+print_help()
+{
+    echo "Script to get number of hubs on a firmware version"
+    echo ""
+    echo "Usage:  -t (target_environment)"
+    echo ""
+}
+
+
+while  getopts "t:?" option;
+do
+       # echo $OPTARG
+        case $option in
+        t) target_environment=$OPTARG;;
+        \?) print_help; exit 1
+        ;;
+        esac
+done
+
+hubid=$1
+
+if [ -z "$target_environment" ]; then
+        echo " target env missing"
+        print_help
+
+elif [ -z "$hubid" ]; then
+
+        echo "Hub ID is missing"
+        print_help
+else
+        echo "All options present. Will now continue..."
+
+sleep 2
+
+call=("-target="$target_environment "-call=/hubs/$hubid")
+WD $call | jq ". | { HubVersion: .hubInfo.version }"
+
+
+fi
+
+
+

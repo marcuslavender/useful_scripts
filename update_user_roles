@@ -1,0 +1,91 @@
+#!/bin/bash
+
+
+# Script to update user roles for FLST / Hubugger
+
+
+
+print_help()
+{
+    echo "Script to update user roles for FLST and Hubugger"
+    echo ""
+    echo "Usage:  -t (target_environment) -u (userid) -e (email)" 
+    echo ""
+}
+
+
+while  getopts "t:u:e:?" option;
+do
+        echo $OPTARG
+        case "{$option}"
+        in
+	e) email=${OPTARG};;
+	u) userid=${OPTARG};;
+        t) target_environment=${OPTARG};;
+        \?) print_help; exit 1;;
+        esac
+done
+
+
+echo "all arguments provided will continue"
+echo ""
+echo "Enter are you sure you wish to do this?: "
+echo ""
+
+sleep 2
+
+while [ -z "$answer" ]
+    do
+
+    printf "Enter ['Yes' or 'No' to continue] : "
+    read -r answer
+    sleep 2
+    done
+
+if [ $answer == "yes" ] || [ $answer == "YES" ] || [ $answer == "no" ] || [ $answer == "NO" ]; then
+
+
+
+	echo "Enter the role you would like to set: "
+	echo "options are 'ROLE_USER', 'ROLE_ADMIN' and 'ROLE_SUPPORT'"
+	echo""
+	sleep 1
+	echo "Choose one:"
+	echo""
+
+	while [ -z "$answer1" ]
+    	do
+
+    		printf "Enter ['ROLE_USER' or 'ROLE_ADMIN' or 'ROLE_SUPPORT'] : "
+    		read -r answer1
+    		sleep 2
+    		done
+
+
+
+	if [ $answer1 == "ROLE_ADMIN" ] || [ $answer1 == "ROLE_SUPPORT" ] || [ $answer1 == "ROLE_USER" ]; then
+
+
+
+		call=$(echo "-target=ukprod -method=POST -call=/users/$userid -body={\"users\":[{\"permissions\":[\"$answer1\"]}:{\"email\":{\"$email\"}}]}")
+
+                WD $call
+	
+	else
+
+		echo "Invalid user role entered:"
+		echo "now exiting"
+		sleep 2
+		exit=1
+	fi
+
+	
+
+	else 
+		echo "invalid answer entered"
+		echo "now exiting"
+		sleep 2
+		exit=1
+
+fi
+
