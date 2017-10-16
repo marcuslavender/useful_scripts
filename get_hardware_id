@@ -1,0 +1,65 @@
+#!/bin/bash
+
+
+# Script to get a list of all hardware ID's
+
+
+print_help()
+{
+    echo "Script to get a list of all hardware ID's"
+    echo ""
+    echo "Usage:  -t (target_environment)"
+    echo ""
+}
+
+
+while  getopts "t:?" option;
+do
+        echo $OPTARG
+        case "{$option}"
+        in
+        t) target_environment=${OPTARG};;
+        \?) print_help; exit 1;;
+        esac
+done
+
+
+call=$(echo "-target="$target_environment "-call=/hardware")
+data=$(WD $call)
+
+echo "would you like to search via model?: "
+
+
+    while [ -z "$answer" ]
+    do
+
+    printf "Enter ['yes' or 'no' to continue] :"
+    read -r answer
+    sleep 2
+    done
+
+	if [ "$answer" == "yes" ]; then
+
+		echo "enter model: "
+
+
+    		while [ -z "$answer1" ]
+    		do
+    		printf "Enter ['model' to continue] :"
+    		read -r answer1
+    		sleep 2 
+		done
+		
+		echo returning results for "$answer1"
+		sleep 2
+
+		models=$(echo "$data" | jq '.[] ')
+
+		echo "$models" | grep -B 3 "$answer1"
+
+	else
+		echo "Ok will return all Model information"
+		sleep 2
+		echo "$data" | jq
+
+	fi
