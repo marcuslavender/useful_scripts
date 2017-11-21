@@ -1,0 +1,48 @@
+#!/bin/bash
+
+
+# Script to findout hub type when given an input list of hub id's 
+
+
+
+print_help() {
+
+echo "Script to reset users passwords
+usage: password_reset  -d (path_to_SCSdump) -w (working_file) -i (input_list)  -r (results_file)"
+}
+
+
+while getopts ":d:w:i:r:?" option;
+do
+        case $option in
+        d) DUMP_FILE=$OPTARG;;
+        w) TMP_LIST=$OPTARG;;
+        i) INPUT_LIST=$OPTARG;;
+	r) RESULTS_LIST=$OPTARG;;
+        /?) print_help;  exit 1;;
+        esac
+done
+
+if [ -z "$DUMP_FILE" ] || [ -z "$TMP_LIST" ] || [ -z "$INPUT_LIST" ] || [ -z "$RESULTS_LIST" ]
+then
+	echo ""
+	echo "" 
+	print_help
+	exit=1
+
+else 
+
+touch $RESULTS_LIST
+echo "Parsing SCS Dump."
+
+
+cat $DUMP_FILE | jq -r ".[] | [.hubId,(.properties|.hardwareVersion)]" > $TMP_LIST
+
+while read p; 
+do 
+	cat $TMP_LIST | grep -b1 $p >> $RESULTS_LIST
+done  < $INPUT_LIST
+
+fi
+
+
